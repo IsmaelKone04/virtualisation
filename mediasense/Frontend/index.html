@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediaSense — Transcription & Analyse</title>
+<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="wrapper">
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🧠</div>
+      <div class="logo-text">Media<span>Sense</span></div>
+    </div>
+    <div class="header-actions">
+      <button class="theme-toggle" id="themeToggle" title="Changer de thème">
+        <span class="theme-icon-dark">🌙</span>
+        <span class="theme-icon-light">☀️</span>
+      </button>
+      <div class="badge">AWS Powered</div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <h1>
+      Analyse multimodale
+      <span class="line2">par intelligence artificielle</span>
+    </h1>
+    <p>Transcrivez vos fichiers audio et détectez le contenu de vos images grâce aux services Amazon AWS.</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="audio" onclick="switchTab('audio')">
+      <span class="tab-icon">🎤</span> Transcription Audio
+    </button>
+    <button class="tab" data-tab="image" onclick="switchTab('image')">
+      <span class="tab-icon">🖼️</span> Analyse d'Image
+    </button>
+    <button class="tab" data-tab="live" onclick="switchTab('live')">
+      <span class="tab-icon">🎙️</span> Enregistrement Live
+    </button>
+  </div>
+
+  <!-- Audio Panel -->
+  <div id="audio-panel" class="panel active">
+
+    <div class="upload-zone" id="audio-zone"
+         ondragover="handleDragOver(event, 'audio')"
+         ondragleave="handleDragLeave('audio')"
+         ondrop="handleDrop(event, 'audio')"
+         onclick="document.getElementById('audio-input').click()">
+      <div class="upload-icon">🎧</div>
+      <h3>Déposez votre fichier audio</h3>
+      <p>Glissez-déposez ici ou cliquez pour sélectionner<br>Formats acceptés : MP3, WAV, M4A, FLAC, OGG</p>
+      <button class="btn-upload" onclick="event.stopPropagation(); document.getElementById('audio-input').click()">
+        Choisir un fichier
+      </button>
+      <input type="file" id="audio-input" accept=".mp3,.wav,.m4a,.flac,.ogg,audio/*" onchange="handleAudioFile(this)">
+    </div>
+
+
+    <div id="audio-preview" class="preview-card">
+      <div id="audio-file-loading" class="file-loading">
+        <div class="spinner"></div>
+        <span>Chargement du fichier audio...</span>
+      </div>
+      <div id="audio-preview-content">
+        <div class="preview-header">
+          <span>🎵 Fichier audio</span>
+          <button class="remove-btn" onclick="removeFile('audio')">✕</button>
+        </div>
+        <div class="audio-info">
+          <span id="audio-name" class="filename"></span>
+          <span id="audio-size" class="filesize"></span>
+        </div>
+        <div class="audio-player-container">
+          <audio id="audio-player" controls preload="metadata">
+            Votre navigateur ne supporte pas la lecture audio.
+          </audio>
+          <div class="audio-duration-badge">
+            <span>⏱️ Durée : </span>
+            <span id="audio-duration">--:--</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="error-msg" id="audio-error">
+      <span>⚠️</span>
+      <span id="audio-error-text">Erreur inconnue.</span>
+    </div>
+
+    <button class="btn-submit" id="audio-submit" disabled onclick="simulateTranscription()">
+      <div class="spinner" id="audio-spinner"></div>
+      <span id="audio-btn-text">🚀 Lancer la transcription</span>
+    </button>
+
+    <div class="progress-bar" id="audio-progress">
+      <div class="progress-fill" id="audio-progress-fill"></div>
+    </div>
+
+    <div class="results-box" id="audio-results">
+      <div class="results-header">
+        <div class="results-label">Transcription terminée</div>
+        <button class="btn-copy" onclick="copyResult('audio')">📋 Copier</button>
+      </div>
+      <div class="stats-bar" id="audio-stats"></div>
+      <div class="results-text" id="audio-output"></div>
+    </div>
+
+  </div>
+
+  <!-- Image Panel -->
+  <div id="image-panel" class="panel">
+
+    <div class="upload-zone" id="image-zone"
+         ondragover="handleDragOver(event, 'image')"
+         ondragleave="handleDragLeave('image')"
+         ondrop="handleDrop(event, 'image')"
+         onclick="document.getElementById('image-input').click()">
+      <div class="upload-icon">🔍</div>
+      <h3>Déposez votre image</h3>
+      <p>Glissez-déposez ici ou cliquez pour sélectionner<br>Formats acceptés : JPG, PNG, WEBP, GIF, BMP</p>
+      <button class="btn-upload" onclick="event.stopPropagation(); document.getElementById('image-input').click()">
+        Choisir une image
+      </button>
+      <input type="file" id="image-input" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,image/*" onchange="handleImageFile(this)">
+    </div>
+
+    <div class="img-preview-container" id="img-preview-container">
+      <img id="img-preview" src="" alt="Aperçu">
+      <div class="img-overlay"></div>
+      <div class="img-overlay-text" id="img-overlay-text">—</div>
+      <button class="btn-remove" onclick="removeFile('image')" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.5);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+
+    <div class="error-msg" id="image-error">
+      <span>⚠️</span>
+      <span id="image-error-text">Erreur inconnue.</span>
+    </div>
+
+    <button class="btn-submit" id="image-submit" disabled onclick="simulateImageAnalysis()">
+      <div class="spinner" id="image-spinner"></div>
+      <span id="image-btn-text">🔍 Analyser l'image</span>
+    </button>
+
+    <div class="progress-bar" id="image-progress">
+      <div class="progress-fill" id="image-progress-fill"></div>
+    </div>
+
+    <div class="results-box" id="image-results">
+      <div class="results-header">
+        <div class="results-label">Analyse Rekognition terminée</div>
+        <button class="btn-copy" onclick="copyResult('image')">📋 Copier</button>
+      </div>
+      <div class="stats-bar" id="image-stats"></div>
+      <div class="tags-container" id="image-output"></div>
+
+      <!-- L'aperçu de l'image (ton CSS actuel) -->
+      <div class="img-preview-container" id="image-preview">
+          <img src="" alt="Aperçu">
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Live Recording Panel -->
+  <div id="live-panel" class="panel">
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-header">🎤 Enregistrement audio en direct</div>
+      <div class="live-recording-area">
+        <div class="waveform-container">
+          <canvas id="waveform-canvas" width="600" height="80" style="width:100%; height:80px; border-radius:12px; background: rgba(0,0,0,0.2)"></canvas>
+          <div id="live-pulse" class="pulse-ring"></div>
+        </div>
+        <div class="live-controls">
+          <button id="live-mic-btn" class="mic-btn" onclick="toggleRecording()">
+            <span id="live-mic-icon">🎙️</span>
+          </button>
+          <div class="live-info">
+            <div id="live-status">Appuyez pour enregistrer</div>
+            <div id="live-timer">00:00</div>
+          </div>
+        </div>
+        
+        <!-- Actions après enregistrement -->
+        <div id="live-actions" class="live-actions">
+          <div class="live-audio-preview">
+            <audio id="live-audio-player" controls preload="metadata">
+              Votre navigateur ne supporte pas la lecture audio.
+            </audio>
+            <div class="audio-duration-info">
+              <span></span>
+              <span id="live-audio-duration"></span>
+            </div>
+          </div>
+          <div class="action-buttons">
+            <button class="action-btn listen-btn" onclick="playLiveRecording()">
+              🎧 Écouter
+            </button>
+            <button class="action-btn delete-btn" onclick="deleteLiveRecording()">
+              🗑️ Supprimer
+            </button>
+            <button class="action-btn validate-btn" onclick="validateAndTranscribe()">
+              ✅ Valider et transcrire
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="live-error" class="error-msg">
+      <span id="live-error-text"></span>
+    </div>
+    
+    <div id="live-results" class="results-card">
+      <div class="results-header">
+        <div class="results-stats" id="live-stats">
+          <div class="stat"><div class="stat-value">--</div><div class="stat-label">DURÉE</div></div>
+          <div class="stat"><div class="stat-value">--</div><div class="stat-label">MOTS</div></div>
+          <div class="stat"><div class="stat-value">--</div><div class="stat-label">LANGUE</div></div>
+        </div>
+        <div class="results-actions">
+          <button class="copy-btn" onclick="copyLiveResult()">📋 Copier</button>
+          <button class="new-btn" onclick="newLiveRecording()">🔄 Nouvel enregistrement</button>
+        </div>
+      </div>
+      <div class="results-content">
+        <div class="output-text" id="live-output"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Développé avec <span>Anthropic (analyse d'image et compréhension du langage)</span> & <span>AssemblyAI (transcription de la parole).</span>
+  </footer>
+
+</div>
+<script src="script.js"></script>
+</body>
+</html>
